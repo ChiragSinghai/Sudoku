@@ -71,6 +71,9 @@ class Board:
         row, col = self.selected
         if self.cubes[row][col].value == 0:
             self.cubes[row][col].set_temp(0)
+        elif not self.cubes[row][col].set:
+            self.cubes[row][col].set_value(0)
+            self.cubes[row][col].set_temp(0)
 
     def select(self,row,col):
         # Reset all other
@@ -80,6 +83,16 @@ class Board:
 
         self.cubes[row][col].selected = True
         self.selected = (row, col)
+
+    def is_finished(self):
+        for i in range(self.rows):
+            for j in range(self.cols):
+                if self.cubes[i][j].value == 0:
+                    return False
+        return True
+
+    def solve(self):
+
 
 
 class Cube:
@@ -146,7 +159,7 @@ def main():
                     key = 8
                 if event.key == pygame.K_9:
                     key = 9
-                if event.key == pygame.K_DELETE:
+                if event.key == pygame.K_DELETE or event.key == pygame.K_BACKSPACE:
                     board.clear()
                     key = None
                 if event.key == pygame.K_RETURN:
@@ -157,6 +170,9 @@ def main():
                         else:
                             print('Failure')
                         key = None
+                    if board.is_finished():
+                        print("Game over")
+                        run = False
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
                 clicked = board.click(pos)
