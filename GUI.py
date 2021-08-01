@@ -22,6 +22,10 @@ class Board:
                       for i in range(self.nrows)]
         self.selected = None
 
+    def sketch(self, val):
+        row, col = self.selected
+        self.cubes[row][col].set_temp(val)
+
     def click(self, pos):
         """
         :param: pos
@@ -47,6 +51,11 @@ class Board:
         for i in range(self.nrows):
             for j in range(self.ncols):
                 self.cubes[i][j].draw(win)
+
+    def clear(self):
+        row, col = self.selected
+        if self.cubes[row][col].value == 0:
+            self.cubes[row][col].set_temp(0)
 
     def select(self,row,col):
         # Reset all other
@@ -97,12 +106,34 @@ def main():
     run = True
     Screen = pygame.display.set_mode((540,600))
     board = Board(540,540)
-
+    key = None
     pygame.display.set_caption('Soduko')
     while run:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_1:
+                    key = 1
+                if event.key == pygame.K_2:
+                    key = 2
+                if event.key == pygame.K_3:
+                    key = 3
+                if event.key == pygame.K_4:
+                    key = 4
+                if event.key == pygame.K_5:
+                    key = 5
+                if event.key == pygame.K_6:
+                    key = 6
+                if event.key == pygame.K_7:
+                    key = 7
+                if event.key == pygame.K_8:
+                    key = 8
+                if event.key == pygame.K_9:
+                    key = 9
+                if event.key == pygame.K_DELETE:
+                    board.clear()
+                    key = None
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
                 clicked = board.click(pos)
@@ -110,6 +141,10 @@ def main():
                 if clicked:
                     board.select(clicked[0], clicked[1])
                     key = None
+
+        if board.selected and key != None:
+            board.sketch(key)
+
         Screen.fill((255,255,255))
         board.draw(Screen)
         pygame.display.update()
