@@ -22,6 +22,19 @@ class Board:
                       for i in range(self.nrows)]
         self.selected = None
 
+    def click(self, pos):
+        """
+        :param: pos
+        :return: (row, col)
+        """
+        if pos[0] < self.width and pos[1] < self.height:
+            gap = self.width // self.nrows
+            x = pos[0] // gap
+            y = pos[1] // gap
+            return (int(y), int(x))
+        else:
+            return None
+
     def draw(self,win):
         gap = self.width//self.nrows
         for i in range(self.nrows+1):
@@ -33,18 +46,24 @@ class Board:
             pygame.draw.line(win,(0,0,0),(i*gap,0),(i*gap,self.height),thickness)
         for i in range(self.nrows):
             for j in range(self.ncols):
-                self.cubes[i][j].set_value(4)
                 self.cubes[i][j].draw(win)
 
+    def select(self,row,col):
+        # Reset all other
+        for i in range(self.nrows):
+            for j in range(self.ncols):
+                self.cubes[i][j].selected = False
 
+        self.cubes[row][col].selected = True
+        self.selected = (row, col)
 
 
 class Cube:
     def __init__(self,value,x,y,width,height):
         self.width = width
         self.height = height
-        self.row = x*self.width//9
-        self.col = y*self.width//9
+        self.row = y*self.width//9
+        self.col = x*self.width//9
         self.value = value
         self.temp = value
         self.set = True if self.value else False
@@ -63,8 +82,8 @@ class Cube:
         elif self.temp != 0:
             txt = fnt.render(str(self.temp),1,(128,128,128))
             win.blit(txt,(self.row+5,self.col+5))
-        if self.selected and self.set:
-            pygame.draw.rect(pygame.draw.rect(win, (255,0,0), (self.row,self.col, gap ,gap), 3))
+        if self.selected and not self.set:
+            pygame.draw.rect(win, (255,0,0), (self.row,self.col, gap,gap), 3)
 
     def set_value(self,val):
         self.value = val
@@ -84,6 +103,13 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pos = pygame.mouse.get_pos()
+                clicked = board.click(pos)
+
+                if clicked:
+                    board.select(clicked[0], clicked[1])
+                    key = None
         Screen.fill((255,255,255))
         board.draw(Screen)
         pygame.display.update()
