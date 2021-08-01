@@ -21,6 +21,21 @@ class Board:
         self.cubes = [[Cube(self.board[i][j],i,j,self.width,self.height) for j in range(self.ncols)]
                       for i in range(self.nrows)]
         self.selected = None
+        self.updated_board = self.board
+
+    def update_board(self):
+        self.updated_board = [[self.cubes[i][j].value for j in range(self.ncols)]for i in range(self.nrows)]
+
+    def place(self,val):
+        i,j = self.selected
+        self.cubes[i][j].set_value(val)
+        self.update_board()
+        if isvalid(self.updated_board,val,(i,j)):
+            return True
+        else:
+            self.cubes[i][j].set_value(0)
+            self.cubes[i][j].set_temp(0)
+            return False
 
     def sketch(self, val):
         row, col = self.selected
@@ -134,6 +149,14 @@ def main():
                 if event.key == pygame.K_DELETE:
                     board.clear()
                     key = None
+                if event.key == pygame.K_RETURN:
+                    i,j = board.selected
+                    if board.cubes[i][j].temp != 0:
+                        if board.place(board.cubes[i][j].temp):
+                            print('Success')
+                        else:
+                            print('Failure')
+                        key = None
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
                 clicked = board.click(pos)
