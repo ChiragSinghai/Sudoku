@@ -1,5 +1,7 @@
+import time
+
 import pygame
-from solver import isvalid,solve
+from solver import isvalid,find
 pygame.font.init()
 
 class Board:
@@ -14,6 +16,7 @@ class Board:
              [0, 0, 5, 2, 0, 6, 3, 0, 0]]
 
     def __init__(self,width,height):
+        self.stack = []
         self.nrows = 9
         self.ncols = 9
         self.width = width
@@ -50,7 +53,7 @@ class Board:
             gap = self.width // self.nrows
             x = pos[0] // gap
             y = pos[1] // gap
-            return (int(y), int(x))
+            return int(y), int(x)
         else:
             return None
 
@@ -91,11 +94,40 @@ class Board:
                     return False
         return True
 
-    def solve(self):
-        self.stack = []
-        self.updated_board = [[self.cubes[i][j].value if self.cubes[i][j].set else 0 for j in range(self.ncols)]for i in range(self.nrows)]
+    def callSolve(self,win):
+        self.stack.clear()
+        self.updated_board = [[self.cubes[i][j].value if self.cubes[i][j].set else 0 for j in range(self.ncols)]
+                              for i in range(self.nrows)]
+        self.solve(win)
         for row in self.updated_board:
             print(row)
+
+
+
+
+    def solve(self,win):
+        clock = pygame.time.Clock()
+        pos = find(self.updated_board)
+        if not pos:
+            self.clear()
+            return True
+        else:
+            row, col = pos
+            self.stack.append([row,col])
+        self.select(self.stack[-1][0],self.stack[-1][1])
+        self.draw(win)
+        pygame.display.update()
+
+
+        for i in range(1, 10):
+            if isvalid(self.updated_board, i, pos):
+                self.updated_board[row][col] = i
+                if self.solve(win):
+                    return True
+                self.updated_board[row][col] = 0
+        if self.stack:
+            self.stack.pop()
+        return False
 
 
 
@@ -116,13 +148,13 @@ class Cube:
         fnt = pygame.font.SysFont("arial",30)
         gap = self.width//9
         if self.set:
-            txt = fnt.render(str(self.value),1,(0,0,0))
+            txt = fnt.render(str(self.value),True,(0,0,0))
             win.blit(txt, (self.row + (gap//2 - txt.get_width() // 2), self.col + (gap//2 - txt.get_height() // 2)))
         elif not self.set and self.value != 0:
-            txt = fnt.render(str(self.value),1,(0,255,0))
+            txt = fnt.render(str(self.value),True,(0,255,0))
             win.blit(txt,(self.row+(gap//2-txt.get_width()//2),self.col+(gap//2-txt.get_height()//2)))
         elif self.temp != 0:
-            txt = fnt.render(str(self.temp),1,(128,128,128))
+            txt = fnt.render(str(self.temp),True,(128,128,128))
             win.blit(txt,(self.row+5,self.col+5))
         if self.selected and not self.set:
             pygame.draw.rect(win, (255,0,0), (self.row,self.col, gap,gap), 3)
@@ -140,7 +172,7 @@ def main():
     Screen = pygame.display.set_mode((540,600))
     board = Board(540,540)
     key = None
-    pygame.display.set_caption('Soduko')
+    pygame.display.set_caption('Sudoku')
     while run:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -165,7 +197,7 @@ def main():
                     key = 8
                 if event.key == pygame.K_9:
                     key = 9
-                    board.solve()
+                    board.callSolve(Screen)
                 if event.key == pygame.K_DELETE or event.key == pygame.K_BACKSPACE:
                     board.clear()
                     key = None
