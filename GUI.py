@@ -80,9 +80,11 @@ class Board:
 
     def select(self,row,col):
         # Reset all other
+
         for i in range(self.nrows):
             for j in range(self.ncols):
                 self.cubes[i][j].selected = False
+                print(self.cubes[i][j].selected)
 
         self.cubes[row][col].selected = True
         self.selected = (row, col)
@@ -106,27 +108,38 @@ class Board:
 
 
     def solve(self,win):
-        clock = pygame.time.Clock()
+
         pos = find(self.updated_board)
         if not pos:
-            self.clear()
             return True
         else:
             row, col = pos
             self.stack.append([row,col])
-        self.select(self.stack[-1][0],self.stack[-1][1])
-        self.draw(win)
-        pygame.display.update()
+        #self.clear()
+        #self.select(self.stack[-1][0],self.stack[-1][1])
+
 
 
         for i in range(1, 10):
+
+
+
             if isvalid(self.updated_board, i, pos):
+                print(row,col)
+                self.select(row,col)
+                win.fill((255,255,255))
+                self.draw(win)
+
+                pygame.display.update()
                 self.updated_board[row][col] = i
+                self.cubes[row][col].set_value(i)
+
                 if self.solve(win):
                     return True
                 self.updated_board[row][col] = 0
-        if self.stack:
-            self.stack.pop()
+                self.cubes[row][col].set_value(0)
+            if self.stack:
+                self.stack.pop()
         return False
 
 
@@ -157,6 +170,7 @@ class Cube:
             txt = fnt.render(str(self.temp),True,(128,128,128))
             win.blit(txt,(self.row+5,self.col+5))
         if self.selected and not self.set:
+            print(self.row,self.col)
             pygame.draw.rect(win, (255,0,0), (self.row,self.col, gap,gap), 3)
 
     def set_value(self,val):
