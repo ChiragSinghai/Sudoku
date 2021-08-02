@@ -15,17 +15,17 @@ def isvalid(bo,num,pos):
     return True
 
 def solve(bo):
-    pos=find(bo)
+    pos = find(bo)
     if not pos:
         return True
     else:
-        row,col=pos
+        row,col = pos
     for i in range(1,10):
         if isvalid(bo,i,pos):
-            bo[row][col]=i
+            bo[row][col] = i
             if solve(bo):
                 return True
-            bo[row][col]=0
+            bo[row][col] = 0
     return False
         
         
@@ -34,7 +34,7 @@ def solve(bo):
 def find(bo):
     for i in range(len(bo)):
         for j in range(len(bo[0])):
-            if bo[i][j]==0:
+            if bo[i][j] == 0:
                 return (i,j)
     return None
 
