@@ -1,5 +1,4 @@
 import time
-
 import pygame
 from solver import isvalid,find,solve
 pygame.font.init()
@@ -98,12 +97,12 @@ class Board:
     def complete(self):
         self.updated_board = [[self.cubes[i][j].value if self.cubes[i][j].set else 0 for j in range(self.ncols)]
                               for i in range(self.nrows)]
-
         solve(self.updated_board)
         for i in range(self.nrows):
             for j in range(self.ncols):
                 if not self.cubes[i][j].set:
                     self.cubes[i][j].set_value(self.updated_board[i][j])
+
 
     def callSolve(self,win):
         self.deselect()
@@ -111,13 +110,13 @@ class Board:
                               for i in range(self.nrows)]
         self.solve_with_display(win)
 
+
     def solve_with_display(self,win):
         pos = find(self.updated_board)
         if not pos:
             return True
         else:
             row, col = pos
-
 
         for i in range(1, 10):
             if isvalid(self.updated_board, i, pos):
@@ -132,11 +131,7 @@ class Board:
                     return True
                 self.updated_board[row][col] = 0
                 self.cubes[row][col].set_value(0)
-
         return False
-
-
-
 
 class Cube:
     def __init__(self,value,x,y,width,height):
@@ -173,14 +168,26 @@ class Cube:
         self.temp = val
 
 
+def draw_time(win,sec):
+    secs = sec % 60
+    minutes = sec//60
+    mat = " " + str(minutes) + ":" + str(secs)
+    fnt = pygame.font.SysFont("comicsans", 40)
+    text = fnt.render("Time: " + mat, 1, (0, 0, 0))
+    win.blit(text, (540 - 160, 560))
+
 
 def main():
     run = True
     Screen = pygame.display.set_mode((540,600))
     board = Board(540,540)
     key = None
+    completed = False
+    start = time.time()
     pygame.display.set_caption('Sudoku')
     while run:
+        if not completed:
+            play_time = round(time.time() - start)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
@@ -202,9 +209,12 @@ def main():
                     key = 7
                 if event.key == pygame.K_8:
                     key = 8
+                if event.key == pygame.K_SPACE:
+                    board.complete()
+                    completed = True
                 if event.key == pygame.K_9:
                     key = 9
-                    board.solve_with_display(Screen)
+
                 if event.key == pygame.K_DELETE or event.key == pygame.K_BACKSPACE:
                     board.clear()
                     key = None
@@ -218,7 +228,8 @@ def main():
                         key = None
                     if board.is_finished():
                         print("Game over")
-                        run = False
+                        completed = True
+                        run = True
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
                 clicked = board.click(pos)
@@ -228,9 +239,9 @@ def main():
 
         if board.selected and key:
             board.sketch(key)
-
         Screen.fill((255,255,255))
         board.draw(Screen)
+        draw_time(Screen,play_time)
         pygame.display.update()
 
 main()
