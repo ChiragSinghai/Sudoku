@@ -1,7 +1,7 @@
 import time
 
 import pygame
-from solver import isvalid,find
+from solver import isvalid,find,solve
 pygame.font.init()
 
 class Board:
@@ -45,10 +45,7 @@ class Board:
         self.cubes[row][col].set_temp(val)
 
     def click(self, pos):
-        """
-        :param: pos
-        :return: (row, col)
-        """
+
         if pos[0] < self.width and pos[1] < self.height:
             gap = self.width // self.nrows
             x = pos[0] // gap
@@ -78,14 +75,14 @@ class Board:
             self.cubes[row][col].set_value(0)
             self.cubes[row][col].set_temp(0)
 
-    def select(self,row,col):
-        # Reset all other
-
+    def deselect(self):
         for i in range(self.nrows):
             for j in range(self.ncols):
                 self.cubes[i][j].selected = False
 
-
+    def select(self,row,col):
+        # Reset all other
+        self.deselect()
         self.cubes[row][col].selected = True
         self.selected = (row, col)
 
@@ -102,19 +99,6 @@ class Board:
         self.updated_board = [[self.cubes[i][j].value if self.cubes[i][j].set else 0 for j in range(self.ncols)]
                               for i in range(self.nrows)]
 
-        def solve(bo):
-            pos = find(bo)
-            if not pos:
-                return True
-            else:
-                row, col = pos
-            for i in range(1, 10):
-                if isvalid(bo, i, pos):
-                    bo[row][col] = i
-                    if solve(bo):
-                        return True
-                    bo[row][col] = 0
-            return False
         solve(self.updated_board)
         for i in range(self.nrows):
             for j in range(self.ncols):
@@ -122,7 +106,7 @@ class Board:
                     self.cubes[i][j].set_value(self.updated_board[i][j])
 
     def callSolve(self,win):
-        self.stack.clear()
+        self.deselect()
         self.updated_board = [[self.cubes[i][j].value if self.cubes[i][j].set else 0 for j in range(self.ncols)]
                               for i in range(self.nrows)]
         self.solve_with_display(win)
@@ -133,23 +117,22 @@ class Board:
             return True
         else:
             row, col = pos
-            self.stack.append([row,col])
-        #self.clear()
-        #self.select(self.stack[-1][0],self.stack[-1][1])
+
+
         for i in range(1, 10):
             if isvalid(self.updated_board, i, pos):
-                self.select(row,col)
+                self.cubes[row][col].selected = True
                 win.fill((255,255,255))
-                self.draw(win)
-                pygame.display.update()
                 self.updated_board[row][col] = i
                 self.cubes[row][col].set_value(i)
-                if self.solve(win):
+                self.draw(win)
+                pygame.display.update()
+                self.cubes[row][col].selected = False
+                if self.solve_with_display(win):
                     return True
                 self.updated_board[row][col] = 0
                 self.cubes[row][col].set_value(0)
-            if self.stack:
-                self.stack.pop()
+
         return False
 
 
@@ -221,7 +204,7 @@ def main():
                     key = 8
                 if event.key == pygame.K_9:
                     key = 9
-                    board.complete()
+                    board.solve_with_display(Screen)
                 if event.key == pygame.K_DELETE or event.key == pygame.K_BACKSPACE:
                     board.clear()
                     key = None
