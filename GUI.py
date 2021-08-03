@@ -210,7 +210,7 @@ def main():
                 if event.key == pygame.K_8:
                     key = 8
                 if event.key == pygame.K_SPACE:
-                    board.complete()
+                    board.solve_with_display(Screen)
                     completed = True
                 if event.key == pygame.K_9:
                     key = 9
