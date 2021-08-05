@@ -49,7 +49,7 @@ def printboard(bo):
                 print(bo[i][j],end=' ')
             else:
                 print(bo[i][j])
-if __name__=='__main__':
+if __name__ == '__main__':
     board =[[3, 0, 6, 5, 0, 8, 4, 0, 0],
             [5, 2, 0, 0, 0, 0, 0, 0, 0],
             [0, 8, 7, 0, 0, 0, 0, 3, 1],
