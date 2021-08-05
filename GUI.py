@@ -3,16 +3,18 @@ import pygame
 from solver import isvalid,find,solve
 pygame.font.init()
 
+start = None
+
 class Board:
-    board = [[3, 0, 6, 5, 0, 8, 4, 0, 0],
-             [5, 2, 0, 0, 0, 0, 0, 0, 0],
-             [0, 8, 7, 0, 0, 0, 0, 3, 1],
-             [0, 0, 3, 0, 1, 0, 0, 8, 0],
-             [9, 0, 0, 8, 6, 3, 0, 0, 5],
-             [0, 5, 0, 0, 9, 0, 6, 0, 0],
-             [1, 3, 0, 0, 0, 0, 2, 5, 0],
-             [0, 0, 0, 0, 0, 0, 0, 7, 4],
-             [0, 0, 5, 2, 0, 6, 3, 0, 0]]
+    board =[[3, 0, 6, 5, 0, 8, 4, 0, 0],
+        [5, 2, 0, 0, 0, 0, 0, 0, 0],
+        [0, 8, 7, 0, 0, 0, 0, 3, 1],
+        [0, 0, 3, 0, 1, 0, 0, 8, 0],
+        [9, 0, 0, 8, 6, 3, 0, 0, 5],
+        [0, 5, 0, 0, 9, 0, 6, 0, 0],
+        [1, 3, 0, 0, 0, 0, 2, 5, 0],
+        [0, 0, 0, 0, 0, 0, 0, 7, 4],
+        [0, 0, 5, 2, 0, 6, 3, 0, 0]]
 
     def __init__(self,width,height):
         self.stack = []
@@ -112,6 +114,7 @@ class Board:
 
 
     def solve_with_display(self,win):
+        global start
         pos = find(self.updated_board)
         if not pos:
             return True
@@ -124,8 +127,7 @@ class Board:
                 win.fill((255,255,255))
                 self.updated_board[row][col] = i
                 self.cubes[row][col].set_value(i)
-                self.draw(win)
-                pygame.display.update()
+                draw_window(win,self,round(time.time()-start))
                 self.cubes[row][col].selected = False
                 if self.solve_with_display(win):
                     return True
@@ -176,8 +178,14 @@ def draw_time(win,sec):
     text = fnt.render("Time: " + mat, 1, (0, 0, 0))
     win.blit(text, (540 - 160, 560))
 
+def draw_window(win,board,play_time):
+    win.fill((255, 255, 255))
+    board.draw(win)
+    draw_time(win, play_time)
+    pygame.display.update()
 
 def main():
+    global start
     run = True
     Screen = pygame.display.set_mode((540,600))
     board = Board(540,540)
@@ -211,6 +219,7 @@ def main():
                     key = 8
                 if event.key == pygame.K_SPACE:
                     board.solve_with_display(Screen)
+                    play_time = round(time.time() - start)
                     completed = True
                 if event.key == pygame.K_9:
                     key = 9
@@ -239,10 +248,8 @@ def main():
 
         if board.selected and key:
             board.sketch(key)
-        Screen.fill((255,255,255))
-        board.draw(Screen)
-        draw_time(Screen,play_time)
-        pygame.display.update()
+        draw_window(Screen,board,play_time)
+
 
 main()
 pygame.quit()
