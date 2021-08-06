@@ -175,7 +175,7 @@ def draw_time(win,sec):
     minutes = sec//60
     mat = " " + str(minutes) + ":" + str(secs)
     fnt = pygame.font.SysFont("comicsans", 40)
-    text = fnt.render("Time: " + mat, 1, (0, 0, 0))
+    text = fnt.render("Time: " + mat, True, (0, 0, 0))
     win.blit(text, (540 - 160, 560))
 
 def draw_window(win,board,play_time):
