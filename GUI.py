@@ -218,7 +218,8 @@ def main():
                 if event.key == pygame.K_8:
                     key = 8
                 if event.key == pygame.K_SPACE:
-                    board.solve_with_display(Screen)
+                    #board.solve_with_display(Screen)
+                    board.complete()
                     play_time = round(time.time() - start)
                     completed = True
                 if event.key == pygame.K_9:
