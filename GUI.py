@@ -1,20 +1,21 @@
+import sys
 import time
 import pygame
 from solver import isvalid,find,solve
-pygame.font.init()
 
+pygame.font.init()
 start = None
 
 class Board:
-    board =[[3, 0, 6, 5, 0, 8, 4, 0, 0],
-        [5, 2, 0, 0, 0, 0, 0, 0, 0],
-        [0, 8, 7, 0, 0, 0, 0, 3, 1],
-        [0, 0, 3, 0, 1, 0, 0, 8, 0],
-        [9, 0, 0, 8, 6, 3, 0, 0, 5],
-        [0, 5, 0, 0, 9, 0, 6, 0, 0],
-        [1, 3, 0, 0, 0, 0, 2, 5, 0],
-        [0, 0, 0, 0, 0, 0, 0, 7, 4],
-        [0, 0, 5, 2, 0, 6, 3, 0, 0]]
+    board = [[3, 0, 6, 5, 0, 8, 4, 0, 0],
+             [5, 2, 0, 0, 0, 0, 0, 0, 0],
+             [0, 8, 7, 0, 0, 0, 0, 3, 1],
+             [0, 0, 3, 0, 1, 0, 0, 8, 0],
+             [9, 0, 0, 8, 6, 3, 0, 0, 5],
+             [0, 5, 0, 0, 9, 0, 6, 0, 0],
+             [1, 3, 0, 0, 0, 0, 2, 5, 0],
+             [0, 0, 0, 0, 0, 0, 0, 7, 4],
+             [0, 0, 5, 2, 0, 6, 3, 0, 0]]
 
     def __init__(self,width,height):
         self.stack = []
@@ -110,6 +111,7 @@ class Board:
         self.deselect()
         self.updated_board = [[self.cubes[i][j].value if self.cubes[i][j].set else 0 for j in range(self.ncols)]
                               for i in range(self.nrows)]
+
         self.solve_with_display(win)
 
 
@@ -124,13 +126,19 @@ class Board:
         for i in range(1, 10):
             if isvalid(self.updated_board, i, pos):
                 self.cubes[row][col].selected = True
-                win.fill((255,255,255))
+                #win.fill((255,255,255))
                 self.updated_board[row][col] = i
                 self.cubes[row][col].set_value(i)
-                draw_window(win,self,round(time.time()-start))
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        sys.exit()
+
+                draw_window(win, self, round(time.time() - start))
                 self.cubes[row][col].selected = False
                 if self.solve_with_display(win):
                     return True
+
                 self.updated_board[row][col] = 0
                 self.cubes[row][col].set_value(0)
         return False
@@ -218,8 +226,8 @@ def main():
                 if event.key == pygame.K_8:
                     key = 8
                 if event.key == pygame.K_SPACE:
-                    #board.solve_with_display(Screen)
-                    board.complete()
+                    board.callSolve(Screen)
+                    #board.complete()
                     play_time = round(time.time() - start)
                     completed = True
                 if event.key == pygame.K_9:
